@@ -30,6 +30,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate TTS API URL secret
+        run: |
+          if [ -z "$VITE_TTS_API_URL" ]; then
+            echo "VITE_TTS_API_URL is not set. Add it in GitHub repo Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+
       - name: Build
         run: npm run build
 
@@ -48,3 +55,6 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+env:
+  VITE_TTS_API_URL: ${{ secrets.VITE_TTS_API_URL }}
