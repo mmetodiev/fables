@@ -42,6 +42,7 @@ export default function App() {
   const [isReading, setIsReading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const MIN_SEARCH_CHARS = 3;
+  const ttsApiBaseUrl = (import.meta.env.VITE_TTS_API_URL ?? "").replace(/\/$/, "");
 
   // Refs for TTS state
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -89,7 +90,9 @@ export default function App() {
         audioRef.current = null;
       }
 
-      const audio = new Audio(`/api/tts?text=${encodeURIComponent(currentFable.body_child)}`);
+      const ttsPath = `/api/tts?text=${encodeURIComponent(currentFable.body_child)}`;
+      const ttsUrl = ttsApiBaseUrl ? `${ttsApiBaseUrl}${ttsPath}` : ttsPath;
+      const audio = new Audio(ttsUrl);
       audioRef.current = audio;
       audio.preload = "none";
       audio.onended = () => {

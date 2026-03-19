@@ -2,11 +2,22 @@ import 'dotenv/config';
 import express from 'express';
 
 const app = express();
-const port = Number(process.env.API_PORT || 8787);
+const port = Number(process.env.PORT || process.env.API_PORT || 8787);
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || 'EXAVITQu4vr4xnSDxMaL';
 const ELEVENLABS_MODEL_ID = process.env.ELEVENLABS_MODEL_ID || 'eleven_flash_v2_5';
+
+app.use((_req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
+
+app.options('/api/tts', (_req, res) => {
+  res.sendStatus(204);
+});
 
 app.get('/api/tts', async (req, res) => {
   try {
