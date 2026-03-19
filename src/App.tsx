@@ -41,6 +41,7 @@ export default function App() {
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * fables.length));
   const [isReading, setIsReading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const MIN_SEARCH_CHARS = 3;
 
   // Refs for TTS state
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -48,10 +49,15 @@ export default function App() {
 
   const currentFable = fables[currentIndex];
 
-  const filteredFables = fables.filter(f => 
-    f.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    f.moral.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const trimmedSearchQuery = searchQuery.trim();
+  const canSearch = trimmedSearchQuery.length >= MIN_SEARCH_CHARS;
+
+  const filteredFables = canSearch
+    ? fables.filter((f) => {
+        const q = trimmedSearchQuery.toLowerCase();
+        return f.title.toLowerCase().includes(q) || f.moral.toLowerCase().includes(q);
+      })
+    : [];
 
   const shuffleFable = () => {
     const nextIndex = Math.floor(Math.random() * fables.length);
@@ -254,7 +260,7 @@ export default function App() {
               </div>
 
               <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-                {filteredFables.length > 0 ? (
+                {canSearch && filteredFables.length > 0 ? (
                   <div className="grid gap-4">
                     {filteredFables.map((fable) => {
                       const originalIndex = fables.findIndex(f => f.id === fable.id);
@@ -270,10 +276,15 @@ export default function App() {
                       );
                     })}
                   </div>
+                ) : canSearch ? (
+                  <div className="flex flex-col items-center justify-center py-20 opacity-30">
+                    <Search size={48} strokeWidth={1} />
+                    <p className="mt-4 italic">No fables found for "{trimmedSearchQuery}"</p>
+                  </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-20 opacity-30">
                     <Search size={48} strokeWidth={1} />
-                    <p className="mt-4 italic">No fables found for "{searchQuery}"</p>
+                    <p className="mt-4 italic">Type at least {MIN_SEARCH_CHARS} characters to search</p>
                   </div>
                 )}
               </div>
@@ -325,7 +336,7 @@ export default function App() {
                   <div className="cream-card p-8 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 opacity-50 rounded-bl-full -mr-4 -mt-4" />
                     <span className="sans-ui text-[10px] uppercase tracking-widest opacity-50 font-bold">The Lesson</span>
-                    <p className="text-xl mt-3 font-semibold leading-snug">
+                    <p className="text-xl mt-3 font-medium leading-relaxed">
                       {currentFable.moral_elaborated}
                     </p>
                   </div>
